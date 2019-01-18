@@ -1,0 +1,24 @@
+{
+  "name": "sw-client",
+  "version": "0.0.1",
+  "description": "Service worker client.",
+  "main": "webpack.config.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/locomote-sh/sw-client.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/locomote-sh/sw-client/issues"
+  },
+  "homepage": "https://github.com/locomote-sh/sw-client#readme",
+  "devDependencies": {
+    "webpack": "^4.25.1",
+    "webpack-cli": "^3.1.2"
+  }
+}
