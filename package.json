@@ -1,6 +1,6 @@
 {
   "name": "sw-client",
-  "version": "0.0.1",
+  "version": "0.0.8",
   "description": "Service worker client.",
   "main": "webpack.config.js",
   "scripts": {
