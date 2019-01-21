@@ -1,6 +1,8 @@
 const Path = require('path');
 
-const outputPath = Path.join( __dirname, 'dist');
+const { version } = require('./package.json');
+
+const outputPath = Path.join( __dirname, 'dist', 'sw', version );
 
 module.exports = {
     mode: 'production',
