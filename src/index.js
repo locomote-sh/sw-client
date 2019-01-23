@@ -40,11 +40,12 @@
     window.onload = () => {
         // Attempt to register service worker.
         if( 'serviceWorker' in navigator ) {
+            const { serviceWorker } = navigator;
             serviceWorker.register('sw.js')
                 .then( r => {
                     log('info', 'Service worker registered', r );
                     // Process pending queue.
-                    whenReady.serviceWorker = navigator.serviceWorker;
+                    whenReady.serviceWorker = serviceWorker;
                     whenReady.queued.forEach( p => p( serviceWorker ) );
                     whenReady.queued = [];
                 })
