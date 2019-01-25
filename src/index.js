@@ -40,8 +40,18 @@
     window.onload = () => {
         // Attempt to register service worker.
         if( 'serviceWorker' in navigator ) {
+            // Try to read service worker URL from meta tag in the page header.
+            // Tag should be like: <meta name="locomote-service-worker-url" content="/sw.js" />
+            let selector = 'meta[name~=locomote-service-worker-url]';
+            let meta = document.head.querySelector( selector );
+            let url = meta && meta.content;
+            if( !url ) {
+                log('warn','Service worker URL not found');
+                return;
+            }
+            log('debug','Registering service worker @ %s', url );
             const { serviceWorker } = navigator;
-            serviceWorker.register('sw.js')
+            serviceWorker.register( url )
                 .then( r => {
                     log('info', 'Service worker registered', r );
                     // Process pending queue.
