@@ -50,13 +50,15 @@
                     whenReady.queued = [];
                 })
                 .catch( e => log('error', 'Failed to register service worker', e ) );
+            // Refresh the service worker's origins.
+            refresh();
         }
         else log('info','Service workers not supported');
     };
 
     /**
      * Unregister one or more service workers.
-     * @param scopes
+     * @param scopes One or more service worker scope URLs.
      */
     function unregister( ...scopes ) {
         return whenReady( async serviceWorker => {
@@ -93,12 +95,13 @@
 
     /**
      * Refresh a content origin.
-     * @param origin    A content origin URL or path.
+     * @param origin    A content origin URL or path; or '*' to refresh all of a
+     *                  service worker's origins. Defaults to '*'.
      * @param interval  An optional refresh interval. If provided then the content
      *                  origin is automatically refreshed every n minutes. If not
      *                  provided then the content origin is refreshed immediately.
      */
-    function refresh( origin, interval = 0 ) {
+    function refresh( origin = '*', interval = 0 ) {
         if( interval ) {
             return window.setInterval( () => refresh( origin ), interval * 1000 * 60 );
         }
