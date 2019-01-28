@@ -46,7 +46,6 @@
             let meta = document.head.querySelector( selector );
             let url = meta && meta.content;
             if( !url ) {
-                log('warn','Service worker URL not found');
                 return;
             }
             log('debug','Registering service worker @ %s', url );
