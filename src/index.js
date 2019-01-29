@@ -114,7 +114,7 @@
         if( interval ) {
             return window.setInterval( () => refresh( origin ), interval * 1000 * 60 );
         }
-        this.post({ name: 'refresh', args: origin });
+        post({ name: 'refresh', args: origin });
     }
 
     /**
