@@ -54,8 +54,9 @@
                 .then( registration => {
                     log('info', 'Service worker registered', registration );
                     // Process pending queue.
-                    whenReady.serviceWorker = registration;
-                    whenReady.queued.forEach( p => p( registration ) );
+                    const { active } = registration;
+                    whenReady.serviceWorker = active;
+                    whenReady.queued.forEach( p => p( active ) );
                     whenReady.queued = [];
                 })
                 .catch( e => log('error', 'Failed to register service worker', e ) );
@@ -70,10 +71,11 @@
      * @param scopes One or more service worker scope URLs.
      */
     function unregister( ...scopes ) {
-        return whenReady( async serviceWorker => {
+        return whenReady( async () => {
             let count = 0;
             // See https://stackoverflow.com/a/33705250/8085849
-            let registrations = await serviceWorker.getRegistrations()
+            const { serviceWorker } = navigator;
+            const registrations = await serviceWorker.getRegistrations()
             for( let registration of registrations ) {
                 if( !scopes || scopes.some( scope => scope == registration.scope ) ) {
                     registration.unregister()
@@ -89,8 +91,9 @@
      * @param info
      */
     function list( info = 'scopes' ) {
-        return whenReady( async serviceWorker => {
-            let registrations = await serviceWorker.getRegistrations()
+        return whenReady( async () => {
+            const { serviceWorker } = navigator;
+            const registrations = await serviceWorker.getRegistrations()
             if( info == 'scopes' ) {
                 registrations = registrations.map( reg => reg.scope );
             }
@@ -122,7 +125,7 @@
      */
     function post( message ) {
         return whenReady( serviceWorker => {
-            serviceWorker.controller.postMessage( message );
+            serviceWorker.postMessage( message );
         });
     }
 
