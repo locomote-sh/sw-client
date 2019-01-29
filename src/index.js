@@ -52,7 +52,7 @@
             const { serviceWorker } = navigator;
             serviceWorker.register( url )
                 .then( registration => {
-                    log('info', 'Service worker registered', r );
+                    log('info', 'Service worker registered', registration );
                     // Process pending queue.
                     whenReady.serviceWorker = registration;
                     whenReady.queued.forEach( p => p( registration ) );
