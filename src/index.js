@@ -51,11 +51,11 @@
             log('debug','Registering service worker @ %s', url );
             const { serviceWorker } = navigator;
             serviceWorker.register( url )
-                .then( r => {
+                .then( registration => {
                     log('info', 'Service worker registered', r );
                     // Process pending queue.
-                    whenReady.serviceWorker = serviceWorker;
-                    whenReady.queued.forEach( p => p( serviceWorker ) );
+                    whenReady.serviceWorker = registration;
+                    whenReady.queued.forEach( p => p( registration ) );
                     whenReady.queued = [];
                 })
                 .catch( e => log('error', 'Failed to register service worker', e ) );
