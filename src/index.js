@@ -121,6 +121,13 @@
     }
 
     /**
+     * Refresh statically cached content.
+     */
+    function refreshStatics() {
+        post({ name: 'refresh-statics' });
+    }
+
+    /**
      * Post a message to all registered service workers.
      */
     function post( message ) {
@@ -133,6 +140,7 @@
         list,
         isInstalled,
         refresh,
+        refreshStatics,
         post
     };
 
