@@ -14,36 +14,53 @@
 
 (function() {
 
+    /// A queue of async ops on a target object.
+    class Queue extends Array {
+
+        constructor() {
+            super();
+        }
+
+        /// Set the target object.
+        set target( target ) {
+            if( target ) {
+                this._target = target;
+                // Dispatch the target to queued operations.
+                this.forEach( op => op( target ) );
+                this.length = 0;
+            }
+        }
+
+        /// Add an async op to the queue.
+        add( op ) {
+            // If the target is available then pass directly to the op.
+            if( this._target ) {
+                return op( this._target );
+            }
+            // Else queue the op and return a promise that will be resolved
+            // when the op is invoked.
+            return new Promise( resolve => {
+                this.push( target => resolve( op( target ) ) );
+            });
+        }
+
+    }
+
+    /// A queue of message posts to the active service worker.
+    const PostQueue = new Queue();
+
     /// Log function.
     function log( level, msg, ...args ) {
         args.unshift('[locomote] '+msg );
         console[level].apply( console, args );
     }
 
-    /// Function for executing API calls once service worker is loaded.
-    const whenReady = function( fn ) {
-        const { serviceWorker, queued } = whenReady;
-        // If service worker available then execute api call immediately.
-        if( serviceWorker ) {
-            return fn( serviceWorker );
-        }
-        // Service worker not yet available, so return a promise which
-        // queues the api call and resolves once the queue is processed.
-        return new Promise( resolve => {
-            queued.push( serviceWorker => {
-                resolve( fn( serviceWorker ) );
-            });
-        });
-    }
-    whenReady.queued = [];
-
     window.onload = () => {
         // Attempt to register service worker.
         if( 'serviceWorker' in navigator ) {
             // Try to read service worker URL from meta tag in the page header.
             // Tag should be like: <meta name="locomote-service-worker-url" content="/sw.js" />
-            let selector = 'meta[name~=locomote-service-worker-url]';
-            let meta = document.head.querySelector( selector );
+            let meta = document.head.querySelector('meta[name~=locomote-service-worker-url]');
             let url = meta && meta.content;
             if( !url ) {
                 return;
@@ -52,12 +69,11 @@
             const { serviceWorker } = navigator;
             serviceWorker.register( url )
                 .then( registration => {
-                    log('info', 'Service worker registered', registration );
-                    // Process pending queue.
                     const { active } = registration;
-                    whenReady.serviceWorker = active;
-                    whenReady.queued.forEach( p => p( active ) );
-                    whenReady.queued = [];
+                    if( active ) {
+                        log('info', 'Service worker registered', registration );
+                        PostQueue.target = active;
+                    }
                 })
                 .catch( e => log('error', 'Failed to register service worker', e ) );
             // Refresh the service worker's origins.
@@ -70,35 +86,31 @@
      * Unregister one or more service workers.
      * @param scopes One or more service worker scope URLs.
      */
-    function unregister( ...scopes ) {
-        return whenReady( async () => {
-            let count = 0;
-            // See https://stackoverflow.com/a/33705250/8085849
-            const { serviceWorker } = navigator;
-            const registrations = await serviceWorker.getRegistrations()
-            for( let registration of registrations ) {
-                if( !scopes || scopes.some( scope => scope == registration.scope ) ) {
-                    registration.unregister()
-                    count++;
-                }
+    async function unregister( ...scopes ) {
+        let count = 0;
+        // See https://stackoverflow.com/a/33705250/8085849
+        const { serviceWorker } = navigator;
+        const registrations = await serviceWorker.getRegistrations()
+        for( let registration of registrations ) {
+            if( !scopes || scopes.some( scope => scope == registration.scope ) ) {
+                registration.unregister()
+                count++;
             }
-            log('info','Unregistered %s service worker%s', count, count > 1 ? 's' : '' );
-        });
+        }
+        log('info','Unregistered %s service worker%s', count, count > 1 ? 's' : '' );
     }
 
     /**
      * List all available service workers.
      * @param info
      */
-    function list( info = 'scopes' ) {
-        return whenReady( async () => {
-            const { serviceWorker } = navigator;
-            const registrations = await serviceWorker.getRegistrations()
-            if( info == 'scopes' ) {
-                registrations = registrations.map( reg => reg.scope );
-            }
-            return registrations;
-        });
+    async function list( info = 'scopes' ) {
+        const { serviceWorker } = navigator;
+        const registrations = await serviceWorker.getRegistrations()
+        if( info == 'scopes' ) {
+            return registrations.map( reg => reg.scope );
+        }
+        return registrations;
     }
 
     function isInstalled() {
@@ -131,7 +143,7 @@
      * Post a message to all registered service workers.
      */
     function post( message ) {
-        return whenReady( serviceWorker => {
+        return PostQueue.add( serviceWorker => {
             serviceWorker.postMessage( message );
         });
     }
