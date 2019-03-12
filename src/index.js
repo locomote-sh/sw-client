@@ -59,10 +59,11 @@
         // Attempt to register service worker.
         if( 'serviceWorker' in navigator ) {
             // Try to read service worker URL from meta tag in the page header.
-            // Tag should be like: <meta name="locomote-service-worker-url" content="/sw.js" />
-            let meta = document.head.querySelector('meta[name~=locomote-service-worker-url]');
-            let url = meta && meta.content;
+            // Tag should be like: <link rel="locomote-service-worker" href="/sw.js" />
+            const link = document.head.querySelector('link[rel~=locomote-service-worker]');
+            const url = link && link.href;
             if( !url ) {
+                log('debug','Service worker link not found');
                 return;
             }
             log('debug','Registering service worker @ %s', url );
