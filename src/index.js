@@ -66,17 +66,21 @@
                 log('debug','Service worker link not found');
                 return;
             }
+            // Register the service worker.
             log('debug','Registering service worker @ %s', url );
             const { serviceWorker } = navigator;
             serviceWorker.register( url )
+                .catch( e => log('error', 'Failed to register service worker', e ) );
+            // Wait for an active service worker.
+            serviceWorker.ready
                 .then( registration => {
                     const { active } = registration;
                     if( active ) {
                         log('info', 'Service worker registered', registration );
                         PostQueue.target = active;
                     }
+                    else log('warn', 'No active service worker found');
                 })
-                .catch( e => log('error', 'Failed to register service worker', e ) );
             // Refresh the service worker's origins.
             refresh();
         }
