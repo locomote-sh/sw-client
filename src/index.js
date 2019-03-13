@@ -55,7 +55,7 @@
         console[level].apply( console, args );
     }
 
-    window.onload = () => {
+    window.addEventListener('load', () => {
         // Attempt to register service worker.
         if( 'serviceWorker' in navigator ) {
             // Try to read service worker URL from meta tag in the page header.
@@ -85,7 +85,7 @@
             refresh();
         }
         else log('info','Service workers not supported');
-    };
+    });
 
     /**
      * Unregister one or more service workers.
